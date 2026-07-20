@@ -23,7 +23,7 @@ on:
 
 jobs:
   manual-deploy:
-    runs-on: ramesh
+    runs-on: self-hosted
     steps:
       - name: Check inputs
         run: |
