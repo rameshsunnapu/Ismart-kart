@@ -1,0 +1,46 @@
+# .github/actions/setup-node/action.yml
+name: 'Node.js Setup'
+description: 'Setup Node.js with caching and dependency installation'
+
+inputs:
+  node-version:
+    description: 'Node.js version'
+    required: false
+    default: '18'
+  cache-key:
+    description: 'Custom cache key'
+    required: false
+    default: 'node-modules'
+
+outputs:
+  node-version:
+    description: 'The Node.js version that was set up'
+    value: ${{ steps.setup-node.outputs.node-version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+      id: setup-node
+
+    - name: Cache node modules
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Verify installation
+      shell: bash
+      run: |
+        echo "Node version: $(node --version)"
+        echo "NPM version: $(npm --version)"
